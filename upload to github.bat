@@ -65,11 +65,7 @@ set /p commit_message="Enter commit message (or press Enter for default message)
 if "%commit_message%"=="" set commit_message="Initial commit of DevDashboard - GitHub API Integration Tool"
 
 git commit -m "%commit_message%"
-if %ERRORLEVEL% NEQ 0 (
-    echo Failed to commit changes.
-    pause
-    exit /b 1
-)
+REM Don't exit if commit fails - it might just mean there's nothing to commit
 
 REM Check if remote origin exists
 git remote -v | findstr origin >nul
@@ -80,16 +76,10 @@ if %ERRORLEVEL% NEQ 0 (
     echo Example: https://github.com/yourusername/DevDashboard.git
     echo.
     
-    set repo_url=
-    set /p repo_url="Enter GitHub repository URL: "
+    REM Use a hardcoded URL since the input is not working
+    set repo_url=https://github.com/BradyM37/DevDashboard.git
+    echo Using repository URL: %repo_url%
     
-    if "%repo_url%"=="" (
-        echo No repository URL provided.
-        pause
-        exit /b 1
-    )
-    
-    echo Adding remote repository: %repo_url%
     git remote add origin %repo_url%
     if %ERRORLEVEL% NEQ 0 (
         echo Failed to add remote repository.
@@ -101,20 +91,34 @@ if %ERRORLEVEL% NEQ 0 (
 REM Push to GitHub
 echo.
 echo Pushing to GitHub...
+
+REM Try pushing to master branch
+echo Trying to push to master branch...
 git push -u origin master
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo Failed to push to GitHub. Trying with 'main' branch instead...
+    echo Failed to push to master branch. Trying with 'main' branch...
+    
+    REM Try pushing to main branch
     git push -u origin main
     if %ERRORLEVEL% NEQ 0 (
         echo.
-        echo Failed to push to GitHub.
-        echo You might need to:
-        echo 1. Check your internet connection
-        echo 2. Verify your GitHub credentials
-        echo 3. Ensure the repository exists on GitHub
-        pause
-        exit /b 1
+        echo Failed to push to main branch. Creating main branch and trying again...
+        
+        REM Create main branch and push
+        git checkout -b main
+        git push -u origin main
+        
+        if %ERRORLEVEL% NEQ 0 (
+            echo.
+            echo Failed to push to GitHub.
+            echo You might need to:
+            echo 1. Check your internet connection
+            echo 2. Verify your GitHub credentials
+            echo 3. Ensure the repository exists on GitHub
+            pause
+            exit /b 1
+        )
     )
 )
 
