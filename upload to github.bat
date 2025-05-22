@@ -79,6 +79,8 @@ if %ERRORLEVEL% NEQ 0 (
     echo Please create a new repository on GitHub and enter the URL below.
     echo Example: https://github.com/yourusername/DevDashboard.git
     echo.
+    
+    set repo_url=
     set /p repo_url="Enter GitHub repository URL: "
     
     if "%repo_url%"=="" (
@@ -87,7 +89,7 @@ if %ERRORLEVEL% NEQ 0 (
         exit /b 1
     )
     
-    echo Adding remote repository...
+    echo Adding remote repository: %repo_url%
     git remote add origin %repo_url%
     if %ERRORLEVEL% NEQ 0 (
         echo Failed to add remote repository.
